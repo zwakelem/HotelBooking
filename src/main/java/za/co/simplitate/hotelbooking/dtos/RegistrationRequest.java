@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import za.co.simplitate.hotelbooking.enums.UserRole;
 
 @Builder
 public record RegistrationRequest(
@@ -18,7 +19,7 @@ public record RegistrationRequest(
         @NotBlank(message = "PhoneNumber is required")
         String phoneNumber,
         @NotBlank(message = "Role is required")
-        String role,
+        UserRole role,
         @NotBlank(message = "Password is required")
         String password
 ) { }

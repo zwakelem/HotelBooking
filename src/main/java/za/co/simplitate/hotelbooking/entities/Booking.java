@@ -17,6 +17,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedQuery(name = "Booking.isRoomAvailable", query = """
+    SELECT CASE WHEN COUNT(b) = 0 THEN true ELSE false END
+    FROM Booking b
+    WHERE b.room.id = :roomId
+    AND :checkInDate <= b.checkOutDate
+    AND :checkOutDate >= b.checkInDate
+    AND b.bookingStatus IN ('BOOKED', 'CHECKED_IN')
+    """)
 public class Booking {
 
     @Id

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import za.co.simplitate.hotelbooking.enums.UserRole;
 
 import java.time.LocalDate;
 
@@ -37,7 +38,7 @@ public class User {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private String role;
+    private UserRole role;
 
     private boolean isActive;
 
