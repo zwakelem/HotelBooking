@@ -3,10 +3,12 @@ package za.co.simplitate.hotelbooking.security;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import za.co.simplitate.hotelbooking.entities.User;
 
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,7 +18,7 @@ public class AuthUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
     @Override
