@@ -18,7 +18,11 @@ import za.co.simplitate.hotelbooking.repositories.BookingRepository;
 import za.co.simplitate.hotelbooking.repositories.UserRepository;
 import za.co.simplitate.hotelbooking.security.JWTUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static za.co.simplitate.hotelbooking.util.GenericMapper.mapToUserTO;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
     private final ModelMapper modelMapper;
-
     private final BookingRepository bookingRepository;
 
 
@@ -88,8 +91,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response getAllUsers() {
         log.info("getAllUsers: ");
+        List<UserTO> userTOList;
         List<User> users = userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-        List<UserTO> userTOList = modelMapper.map(users, new TypeToken<List<UserTO>>(){}.getType());
+        if (!users.isEmpty()) {
+            userTOList = users.parallelStream()
+                    .map(user -> mapToUserTO(user))
+                    .collect(Collectors.toList());
+        } else {
+            throw new NotFoundException("No users found!!");
+        }
         return Response.builder()
                 .status(200)
                 .users(userTOList)
@@ -147,7 +157,7 @@ public class UserServiceImpl implements UserService {
     public Response getBookingHistory() {
         log.info("updateOwnAccount: ");
         User user = getCurrentLoggedInUser();
-        List<Booking> bookingList = bookingRepository.findBookingByUser(user.getId());
+        List<Booking> bookingList = bookingRepository.findBookingsByUser(user);
         List<BookingTO> bookingTOList = modelMapper.map(bookingList, new TypeToken<List<BookingTO>>(){}.getType());
         return Response.builder()
                 .status(200)

@@ -18,7 +18,6 @@ public record RegistrationRequest(
         String email,
         @NotBlank(message = "PhoneNumber is required")
         String phoneNumber,
-        @NotBlank(message = "Role is required")
         UserRole role,
         @NotBlank(message = "Password is required")
         String password
