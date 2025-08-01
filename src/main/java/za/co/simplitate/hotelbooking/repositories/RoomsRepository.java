@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface RoomsRepository extends JpaRepository<Room, Long> {
 
-//    List<Room> findavailableRooms(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
+    List<Room> findAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
 
-//    List<Room> searchRooms(String searchParam);
+    List<Room> findRoomByDescriptionEqualsIgnoreCase(String searchParam);
 }

@@ -1,4 +1,4 @@
-package za.co.simplitate.hotelbooking.services;
+package za.co.simplitate.hotelbooking.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,8 @@ import za.co.simplitate.hotelbooking.exceptions.NotFoundException;
 import za.co.simplitate.hotelbooking.repositories.BookingRepository;
 import za.co.simplitate.hotelbooking.repositories.UserRepository;
 import za.co.simplitate.hotelbooking.security.JWTUtils;
+import za.co.simplitate.hotelbooking.services.UserService;
+import za.co.simplitate.hotelbooking.util.GenericMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +97,8 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         if (!users.isEmpty()) {
             userTOList = users.parallelStream()
-                    .map(user -> mapToUserTO(user))
-                    .collect(Collectors.toList());
+                    .map(GenericMapper::mapToUserTO)
+                    .toList();
         } else {
             throw new NotFoundException("No users found!!");
         }

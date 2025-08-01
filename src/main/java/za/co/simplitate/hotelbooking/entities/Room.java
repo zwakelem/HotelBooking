@@ -17,6 +17,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedQuery(name = "Room.findAvailableRooms", query = """
+    SELECT r
+    FROM Room r
+    WHERE r.roomType = :roomType
+    """)
 public class Room {
 
     @Id
