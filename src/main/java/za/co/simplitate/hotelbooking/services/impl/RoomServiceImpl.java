@@ -2,8 +2,6 @@ package za.co.simplitate.hotelbooking.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,13 +13,13 @@ import za.co.simplitate.hotelbooking.exceptions.InvalidBookingStateException;
 import za.co.simplitate.hotelbooking.exceptions.NotFoundException;
 import za.co.simplitate.hotelbooking.repositories.RoomsRepository;
 import za.co.simplitate.hotelbooking.services.RoomService;
+import za.co.simplitate.hotelbooking.util.GenericMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -33,13 +31,13 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomsRepository roomsRepository;
 
-    private final ModelMapper modelMapper;
 
-    private static final String  IMAGE_DIR = System.getProperty("user.dir") + "/product-image";
+    private static final String  IMAGE_DIR = System.getProperty("user.dir") + "/product-image/";
 
     @Override
     public Response addRoom(RoomTO roomTO, MultipartFile imageFile) {
-        Room roomEntity = modelMapper.map(roomTO, Room.class);
+        log.info("addRoom: {}", roomTO);
+        Room roomEntity = GenericMapper.mapToRoom(roomTO);
         if(imageFile != null) {
 
             String imagePath = null;
@@ -60,6 +58,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response updateRoom(RoomTO roomTO, MultipartFile imageFile) {
+        log.info("addRoom: {}", roomTO);
         Room existingRoom = roomsRepository.findById(roomTO.id())
                 .orElseThrow(() -> new NotFoundException("Room does not exist"));
 
@@ -73,8 +72,7 @@ public class RoomServiceImpl implements RoomService {
             existingRoom.setImageUrl(imagePath);
         }
 
-        //TODO add validation for room attribute
-
+        updateRoom(roomTO, existingRoom);
         roomsRepository.save(existingRoom);
         return Response.builder()
                 .status(204)
@@ -82,10 +80,40 @@ public class RoomServiceImpl implements RoomService {
                 .build();
     }
 
+    private static void updateRoom(RoomTO roomTO, Room existingRoom) {
+        if(roomTO.roomNumber() != null) {
+            existingRoom.setRoomNumber(roomTO.roomNumber());
+        }
+        if(roomTO.roomType() != null) {
+            existingRoom.setRoomType(roomTO.roomType());
+        }
+        if(roomTO.pricePerNight() != null) {
+            existingRoom.setPricePerNight(roomTO.pricePerNight());
+        }
+        if(roomTO.capacity() != null) {
+            existingRoom.setCapacity(roomTO.capacity());
+        }
+        if(roomTO.description() != null) {
+            existingRoom.setDescription(roomTO.description());
+        }
+        if(roomTO.imageUrl() != null) {
+            existingRoom.setImageUrl(roomTO.imageUrl());
+        }
+    }
+
     @Override
     public Response getAllRooms() {
+        log.info("getAllRooms: ");
+        List<RoomTO> roomTOList;
         List<Room> roomList = roomsRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-        List<RoomTO> roomTOList = modelMapper.map(roomList, new TypeToken<List<RoomTO>>() {}.getType());
+
+        if (!roomList.isEmpty()) {
+            roomTOList = roomList.parallelStream()
+                    .map(GenericMapper::mapToRoomTO)
+                    .toList();
+        } else {
+            throw new NotFoundException("No rooms found!!");
+        }
         return Response.builder()
                 .status(200)
                 .message(SUCCESS)
@@ -95,9 +123,10 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response getRoomById(Long roomId) {
+        log.info("addRoom: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundException(String.format("Room with id=%d not found", roomId)));
-        RoomTO roomTO = modelMapper.map(existingRoom, RoomTO.class);
+        RoomTO roomTO = GenericMapper.mapToRoomTO(existingRoom);
         return Response.builder()
                 .status(200)
                 .message(SUCCESS)
@@ -107,6 +136,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response deleteRoom(Long roomId) {
+        log.info("addRoom: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundException("Room does not exist"));
         roomsRepository.delete(existingRoom);
@@ -118,10 +148,19 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType) {
-        // validate dates
+        log.info("getAvailableRooms: checkInDate={} checkOutDate={} roomType={}", checkInDate, checkOutDate, roomType);
         validateDates(checkInDate, checkOutDate);
-        List<Room> roomList = roomsRepository.findAvailableRooms(checkInDate, checkOutDate, roomType);
-        List<RoomTO> roomTOList = modelMapper.map(roomList, new TypeToken<List<RoomTO>>() {}.getType());
+        List<Room> roomList = roomsRepository.findAvailableRooms(roomType);
+//        List<Room> roomList = roomsRepository.findAvailableRooms(checkInDate, checkOutDate, roomType);
+
+        List<RoomTO> roomTOList;
+        if (!roomList.isEmpty()) {
+            roomTOList = roomList.parallelStream()
+                    .map(GenericMapper::mapToRoomTO)
+                    .toList();
+        } else {
+            throw new NotFoundException("No rooms found!!");
+        }
         return Response.builder()
                 .status(200)
                 .message(SUCCESS)
@@ -131,13 +170,22 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomType> getAllRoomTypes() {
+        log.info("getAllRoomTypes: ");
         return Arrays.asList(RoomType.values());
     }
 
     @Override
     public Response searchRoom(String input) {
+        log.info("addRoom: input={}", input);
         List<Room> roomList = roomsRepository.findRoomByDescriptionEqualsIgnoreCase(input);
-        List<RoomTO> roomTOList = modelMapper.map(roomList, new TypeToken<List<RoomTO>>() {}.getType());
+        List<RoomTO> roomTOList;
+        if (!roomList.isEmpty()) {
+            roomTOList = roomList.parallelStream()
+                    .map(GenericMapper::mapToRoomTO)
+                    .toList();
+        } else {
+            throw new NotFoundException("No rooms found!!");
+        }
         return Response.builder()
                 .status(200)
                 .message(SUCCESS)
@@ -146,6 +194,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private String saveImage(MultipartFile imageFile) throws Exception {
+        log.info("saveImage: ");
         if (!imageFile.getContentType().startsWith("image/")) {
             log.error("saveImage: not an image");
            throw new IllegalArgumentException("Only image file allowed!!");
