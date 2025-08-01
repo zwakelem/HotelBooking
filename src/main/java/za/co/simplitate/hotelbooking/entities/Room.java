@@ -22,6 +22,11 @@ import java.math.BigDecimal;
     FROM Room r
     WHERE r.roomType = :roomType
     """)
+@NamedQuery(name = "Room.findByDescription", query = """
+    SELECT r
+    FROM Room r
+    WHERE r.description LIKE CONCAT('%', :searchParam, '%')
+    """)
 public class Room {
 
     @Id

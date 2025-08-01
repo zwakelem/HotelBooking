@@ -10,8 +10,9 @@ import java.util.List;
 @Repository
 public interface RoomsRepository extends JpaRepository<Room, Long> {
 
+    //TODO not sure what to do with the dates
     List<Room> findAvailableRooms(RoomType roomType);
 //    List<Room> findAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
 
-    List<Room> findRoomByDescriptionEqualsIgnoreCase(String searchParam);
+    List<Room> findByDescription(String searchParam);
 }

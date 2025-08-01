@@ -177,7 +177,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Response searchRoom(String input) {
         log.info("addRoom: input={}", input);
-        List<Room> roomList = roomsRepository.findRoomByDescriptionEqualsIgnoreCase(input);
+        List<Room> roomList = roomsRepository.findByDescription(input);
         List<RoomTO> roomTOList;
         if (!roomList.isEmpty()) {
             roomTOList = roomList.parallelStream()
