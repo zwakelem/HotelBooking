@@ -43,7 +43,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.addRoom(roomTO, imageFile));
     }
 
-    @PutMapping("/add")
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> updateRoom(
             @RequestParam (value = "roomNumber", required = false) Integer roomNumber,
