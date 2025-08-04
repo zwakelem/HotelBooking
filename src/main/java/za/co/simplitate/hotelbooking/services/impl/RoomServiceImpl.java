@@ -22,12 +22,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static za.co.simplitate.hotelbooking.Const.SUCCESS;
+import static za.co.simplitate.hotelbooking.util.CommonUtil.validateDates;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RoomServiceImpl implements RoomService {
-
-    public static final String SUCCESS = "success";
 
     private final RoomsRepository roomsRepository;
 
@@ -225,21 +226,6 @@ public class RoomServiceImpl implements RoomService {
         return imagePath;
     }
 
-    private static void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
 
-        if(checkInDate != null && checkOutDate != null) {
-            if(checkInDate.isBefore(LocalDate.now())) {
-                throw new InvalidBookingStateException("Check IN date must be before today");
-            }
-
-            if(checkOutDate.isBefore(checkInDate)) {
-                throw new InvalidBookingStateException("Check OUT date must be before check IN date");
-            }
-
-            if(checkInDate.isEqual(checkOutDate)) {
-                throw new InvalidBookingStateException("Check IN date cannot be equal to check OUT date");
-            }
-        }
-    }
 
 }
