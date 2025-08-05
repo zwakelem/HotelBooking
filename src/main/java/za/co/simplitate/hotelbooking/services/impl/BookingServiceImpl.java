@@ -76,7 +76,8 @@ public class BookingServiceImpl implements BookingService {
         BigDecimal totalPrice = calculateTotalPrice(room, bookingTO);
         String bookingRef = bookingCodeGenerator.generateBookingReference();
         Booking booking = createBooking(bookingTO, currentUser, room, totalPrice, bookingRef);
-        bookingRepository.save(booking);
+        Booking persistedBooking = bookingRepository.save(booking);
+        bookingTO = GenericMapper.mapToBookingTO(persistedBooking);
 
         String paymentLink = "http://localhost:4200/payment" + bookingRef + "/" + totalPrice;
         log.info("Booking payment link {}", paymentLink);
