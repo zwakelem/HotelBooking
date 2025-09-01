@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
-        UserTO userTO = modelMapper.map(user, UserTO.class);
+        UserTO userTO = GenericMapper.mapToUserTO(user);
         return Response.builder()
                 .status(200)
                 .message(SUCCESS)
