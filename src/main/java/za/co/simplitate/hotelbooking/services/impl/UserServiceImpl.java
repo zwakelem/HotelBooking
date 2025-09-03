@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response getBookingHistory() {
-        log.info("updateOwnAccount: ");
+        log.info("getBookingHistory: ");
         User user = getCurrentLoggedInUser();
         List<Booking> bookingList = bookingRepository.findBookingsByUser(user);
         List<BookingTO> bookingTOList = modelMapper.map(bookingList, new TypeToken<List<BookingTO>>(){}.getType());
