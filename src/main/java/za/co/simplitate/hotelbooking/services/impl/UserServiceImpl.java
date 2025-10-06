@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response deleteOwnAccount() {
-        log.info("updateOwnAccount: ");
+        log.info("deleteOwnAccount: ");
         User user = getCurrentLoggedInUser();
         userRepository.delete(user);
         return Response.builder()

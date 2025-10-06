@@ -50,7 +50,8 @@ public class RoomServiceImpl implements RoomService {
             roomEntity.setImageUrl(imagePath);
         }
 
-        roomsRepository.save(roomEntity);
+        Room savedRoom = roomsRepository.save(roomEntity);
+        log.info("addRoom: room saved with id={}", savedRoom.getId());
         return Response.builder()
                 .status(201)
                 .message("Room successfully added.")
@@ -59,7 +60,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response updateRoom(RoomTO roomTO, MultipartFile imageFile) {
-        log.info("addRoom: {}", roomTO);
+        log.info("updateRoom: {}", roomTO);
         Room existingRoom = roomsRepository.findById(roomTO.id())
                 .orElseThrow(() -> new NotFoundException("Room does not exist"));
 
@@ -124,7 +125,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response getRoomById(Long roomId) {
-        log.info("addRoom: roomId={}", roomId);
+        log.info("getRoomById: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundException(String.format("Room with id=%d not found", roomId)));
         RoomTO roomTO = GenericMapper.mapToRoomTO(existingRoom);
@@ -137,7 +138,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response deleteRoom(Long roomId) {
-        log.info("addRoom: roomId={}", roomId);
+        log.info("deleteRoom: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundException("Room does not exist"));
         roomsRepository.delete(existingRoom);
@@ -225,7 +226,4 @@ public class RoomServiceImpl implements RoomService {
 
         return imagePath;
     }
-
-
-
 }
