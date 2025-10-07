@@ -2,8 +2,6 @@ package za.co.simplitate.hotelbooking.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,9 +20,6 @@ import za.co.simplitate.hotelbooking.util.GenericMapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static za.co.simplitate.hotelbooking.util.GenericMapper.mapToUserTO;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     public static final String USER_NOT_FOUND = "User not found!!";
     public static final String PASSWORD_DOES_NOT_MATCH = "Password does not match!!";
-    public static final String EMAIL_NOT_FOUND = "Email not found";
+    public static final String USER_EMAIL_NOT_FOUND = "User not found by email!!";
     public static final String LOGGED_IN_SUCCESSFULLY = "user logged in successfully";
     public static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully!!";
     public static final String SUCCESS = "success";
@@ -41,14 +36,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
-    private final ModelMapper modelMapper;
     private final BookingRepository bookingRepository;
 
 
     @Override
     public Response registerUser(RegistrationRequest registrationRequest) {
         log.info("registerUser: ");
-        UserRole userRole = registrationRequest.role()!= null ? registrationRequest.role() : UserRole.CUSTOMER;
+        UserRole userRole = registrationRequest.role() != null ? registrationRequest.role() : UserRole.CUSTOMER;
         User userToSave = createUser(registrationRequest, userRole);
         userRepository.save(userToSave);
         return Response.builder()
@@ -73,7 +67,7 @@ public class UserServiceImpl implements UserService {
     public Response loginUser(LoginRequest loginRequest) {
         log.info("loginUser: ");
         User user = userRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new NotFoundException(EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(USER_EMAIL_NOT_FOUND));
 
         if(!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new InvalidCredentialsException(PASSWORD_DOES_NOT_MATCH);
@@ -160,7 +154,10 @@ public class UserServiceImpl implements UserService {
         log.info("getBookingHistory: ");
         User user = getCurrentLoggedInUser();
         List<Booking> bookingList = bookingRepository.findBookingsByUser(user);
-        List<BookingTO> bookingTOList = modelMapper.map(bookingList, new TypeToken<List<BookingTO>>(){}.getType());
+        List<BookingTO> bookingTOList = new ArrayList<>();
+        if(!bookingList.isEmpty()) {
+            bookingTOList = bookingList.stream().map(GenericMapper::mapToBookingTO).toList();
+        }
         return Response.builder()
                 .status(200)
                 .bookings(bookingTOList)

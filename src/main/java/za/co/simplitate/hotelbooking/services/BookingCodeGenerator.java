@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import za.co.simplitate.hotelbooking.entities.BookingReference;
 import za.co.simplitate.hotelbooking.repositories.BookingReferenceRepository;
 
-import static java.lang.Math.*;
+import static java.lang.Math.random;
 
 @Service
 @RequiredArgsConstructor

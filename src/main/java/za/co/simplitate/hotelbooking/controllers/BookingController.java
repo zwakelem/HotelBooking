@@ -11,7 +11,7 @@ import za.co.simplitate.hotelbooking.services.BookingService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/booking")
+@RequestMapping("/api/bookings")
 @Slf4j
 public class BookingController {
 

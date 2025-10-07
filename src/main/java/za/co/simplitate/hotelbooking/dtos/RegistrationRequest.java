@@ -1,11 +1,7 @@
 package za.co.simplitate.hotelbooking.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import za.co.simplitate.hotelbooking.enums.UserRole;
 
 @Builder
