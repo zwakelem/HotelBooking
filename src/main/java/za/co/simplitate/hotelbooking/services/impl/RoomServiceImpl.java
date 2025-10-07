@@ -178,8 +178,28 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Response searchRoom(String input) {
-        log.info("addRoom: input={}", input);
+        log.info("searchRoom: input={}", input);
         List<Room> roomList = roomsRepository.findByDescription(input);
+        List<RoomTO> roomTOList;
+        if (!roomList.isEmpty()) {
+            roomTOList = roomList.parallelStream()
+                    .map(GenericMapper::mapToRoomTO)
+                    .toList();
+        } else {
+            throw new NotFoundException("No rooms found!!");
+        }
+        return Response.builder()
+                .status(200)
+                .message(SUCCESS)
+                .rooms(roomTOList)
+                .build();
+    }
+
+    @Override
+    public Response getRoomsByType(RoomType roomType) {
+        log.info("getRoomsByType: roomType={}", roomType);
+
+        List<Room> roomList = roomsRepository.findRoomByRoomType(roomType);
         List<RoomTO> roomTOList;
         if (!roomList.isEmpty()) {
             roomTOList = roomList.parallelStream()
