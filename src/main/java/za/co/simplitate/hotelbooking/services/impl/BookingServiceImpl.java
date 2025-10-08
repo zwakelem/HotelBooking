@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static za.co.simplitate.hotelbooking.Const.ROOM_NOT_FOUND;
 import static za.co.simplitate.hotelbooking.Const.SUCCESS;
 import static za.co.simplitate.hotelbooking.util.CommonUtil.validateDates;
 
@@ -35,9 +36,10 @@ import static za.co.simplitate.hotelbooking.util.CommonUtil.validateDates;
 @Slf4j
 public class BookingServiceImpl implements BookingService {
 
-    public static final String BOOKING_CREATED_SUCCESSFULLY = "booking created successfully";
-    public static final String ROOM_NOT_FOUND = "Room not found";
-    public static final String BOOKING_CONFIRMATION = "BOOKING CONFIRMATION";
+    private static final String BOOKING_CREATED_SUCCESSFULLY = "booking created successfully";
+    private static final String BOOKING_CONFIRMATION = "BOOKING CONFIRMATION";
+    private static final String BOOKING_REF_NOT_FOUND = "Booking with ref=%d not found!!";
+    private static final String BOOKING_ID_NOT_FOUND = "Booking with ref=%d not found!!";
 
     private final BookingRepository bookingRepository;
 
@@ -67,8 +69,14 @@ public class BookingServiceImpl implements BookingService {
     public Response createBooking(BookingTO bookingTO) {
         log.info("createBooking: ");
         User currentUser = userService.getCurrentLoggedInUser();
-        Room room = roomsRepository.findById(bookingTO.room().getId())
-                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+
+        Long roomId = bookingTO.room().getId();
+        Room room = roomsRepository.findById(roomId)
+                .orElseThrow(() -> {
+                    var message = String.format(ROOM_NOT_FOUND, roomId);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
 
         validateDates(bookingTO.checkInDate(), bookingTO.checkOutDate());
         checkRoomAvailability(bookingTO, room);
@@ -138,7 +146,11 @@ public class BookingServiceImpl implements BookingService {
     public Response findBookingByReference(String ref) {
         log.info("findBookingByReference: ");
         Booking booking = bookingRepository.findBookingByBookingReference(ref)
-                .orElseThrow(() -> new NotFoundException(String.format("Booking with ref=%s not found", ref)));
+                .orElseThrow(() -> {
+                    var message = String.format(BOOKING_REF_NOT_FOUND, ref);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
         BookingTO bookingTO = GenericMapper.mapToBookingTO(booking);
         return Response.builder()
                 .status(200)
@@ -171,6 +183,10 @@ public class BookingServiceImpl implements BookingService {
         if(bookingTO.id() == null)
             throw new NotFoundException("Booking Id is required");
         return bookingRepository.findById(bookingTO.id())
-                .orElseThrow(() -> new NotFoundException("Booking not found!!"));
+                .orElseThrow(() -> {
+                    var message = String.format(BOOKING_ID_NOT_FOUND,  bookingTO.id());
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
     }
 }

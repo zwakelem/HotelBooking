@@ -21,17 +21,17 @@ import za.co.simplitate.hotelbooking.util.GenericMapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import static za.co.simplitate.hotelbooking.Const.SUCCESS;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    public static final String USER_NOT_FOUND = "User not found!!";
     public static final String PASSWORD_DOES_NOT_MATCH = "Password does not match!!";
-    public static final String USER_EMAIL_NOT_FOUND = "User not found by email!!";
+    public static final String USER_EMAIL_NOT_FOUND = "User not found by email=%s!!";
     public static final String LOGGED_IN_SUCCESSFULLY = "user logged in successfully";
     public static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully!!";
-    public static final String SUCCESS = "success";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -67,7 +67,11 @@ public class UserServiceImpl implements UserService {
     public Response loginUser(LoginRequest loginRequest) {
         log.info("loginUser: ");
         User user = userRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new NotFoundException(USER_EMAIL_NOT_FOUND));
+                .orElseThrow(() -> {
+                    var message = String.format(USER_EMAIL_NOT_FOUND, loginRequest.email());
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
 
         if(!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new InvalidCredentialsException(PASSWORD_DOES_NOT_MATCH);
@@ -108,7 +112,11 @@ public class UserServiceImpl implements UserService {
         log.info("getOwnAccountDetails: ");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+                .orElseThrow(() -> {
+                    var message = String.format(USER_EMAIL_NOT_FOUND, email);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
         UserTO userTO = GenericMapper.mapToUserTO(user);
         return Response.builder()
                 .status(200)
@@ -122,7 +130,11 @@ public class UserServiceImpl implements UserService {
         log.info("getCurrentLoggedInUser: ");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+                .orElseThrow(() -> {
+                    var message = String.format(USER_EMAIL_NOT_FOUND, email);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
     }
 
     @Override

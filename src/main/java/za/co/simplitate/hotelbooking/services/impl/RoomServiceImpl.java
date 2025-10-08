@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static za.co.simplitate.hotelbooking.Const.ROOM_NOT_FOUND;
 import static za.co.simplitate.hotelbooking.Const.SUCCESS;
 import static za.co.simplitate.hotelbooking.util.CommonUtil.validateDates;
 
@@ -61,7 +62,11 @@ public class RoomServiceImpl implements RoomService {
     public Response updateRoom(RoomTO roomTO, MultipartFile imageFile) {
         log.info("updateRoom: {}", roomTO);
         Room existingRoom = roomsRepository.findById(roomTO.id())
-                .orElseThrow(() -> new NotFoundException("Room does not exist"));
+                .orElseThrow(() -> {
+                    var message = String.format(ROOM_NOT_FOUND, roomTO.id());
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
 
         if(imageFile != null && !imageFile.isEmpty()) {
             String imagePath = "";
@@ -126,7 +131,11 @@ public class RoomServiceImpl implements RoomService {
     public Response getRoomById(Long roomId) {
         log.info("getRoomById: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(String.format("Room with id=%d not found", roomId)));
+                .orElseThrow(() -> {
+                    var message = String.format(ROOM_NOT_FOUND, roomId);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
         RoomTO roomTO = GenericMapper.mapToRoomTO(existingRoom);
         return Response.builder()
                 .status(200)
@@ -139,7 +148,11 @@ public class RoomServiceImpl implements RoomService {
     public Response deleteRoom(Long roomId) {
         log.info("deleteRoom: roomId={}", roomId);
         Room existingRoom = roomsRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException("Room does not exist"));
+                .orElseThrow(() -> {
+                    var message = String.format(ROOM_NOT_FOUND, roomId);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
         roomsRepository.delete(existingRoom);
         return Response.builder()
                 .status(204)
