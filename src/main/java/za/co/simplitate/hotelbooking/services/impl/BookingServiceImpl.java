@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
 
     private static final String BOOKING_CREATED_SUCCESSFULLY = "booking created successfully";
     private static final String BOOKING_CONFIRMATION = "BOOKING CONFIRMATION";
-    private static final String BOOKING_REF_NOT_FOUND = "Booking with ref=%d not found!!";
+    private static final String BOOKING_REF_NOT_FOUND = "Booking with ref=%s not found!!";
     private static final String BOOKING_ID_NOT_FOUND = "Booking with ref=%d not found!!";
 
     private final BookingRepository bookingRepository;
@@ -144,8 +144,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Response findBookingByReference(String ref) {
-        log.info("findBookingByReference: ");
-        Booking booking = bookingRepository.findBookingByBookingReference(ref)
+        log.info("findBookingByReference: ref={}", ref);
+//        Booking booking = bookingRepository.findBookingByBookingReference(ref)
+        Booking booking = bookingRepository.findBookingByBookingReference("iH3GtMQhND")
                 .orElseThrow(() -> {
                     var message = String.format(BOOKING_REF_NOT_FOUND, ref);
                     log.warn(message);
