@@ -32,7 +32,6 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomsRepository roomsRepository;
 
-
     private static final String  IMAGE_DIR = System.getProperty("user.dir") + "/product-image/";
 
     @Override

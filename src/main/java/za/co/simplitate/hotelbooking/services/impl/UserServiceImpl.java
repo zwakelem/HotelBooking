@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
         return Response.builder()
                 .status(200)
                 .message(USER_REGISTERED_SUCCESSFULLY)
+                .active(Boolean.TRUE)
                 .build();
     }
 

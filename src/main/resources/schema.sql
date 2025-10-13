@@ -1,1 +1,1 @@
-create schema hotel;
+create schema hotel_simple;
